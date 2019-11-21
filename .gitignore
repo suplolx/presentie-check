@@ -1,0 +1,6 @@
+__pycache__
+.vscode
+venv
+secret.py
+credentials.json
+token.pickle
