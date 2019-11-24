@@ -76,35 +76,5 @@ def presentie(naam, file_id):
     for row in df[["Deelnemers", "Dagdelen", "Aanwezig", 
                     "Afwezig", "Afgemeld", "% Aanwezig"]].itertuples():
         if row.Deelnemers == naam:
-            return (row.Deelnemers, row._6)
+            return (row.Deelnemers, row.Aanwezig, row.Afwezig, row.Afgemeld, row._6)
 
-
-def main(input_naam, weeks):
-    if int(weeks) > 10:
-        print("Sorry, het maximale aantal weken is 10.")
-        sys.exit(0)
-    # Initialise sheets app
-    app = client_auth('drive', "v3")
-
-    # Creating a query for selecting the right folder in Google Drive
-    query=f"'{folder_id}' in parents"
-
-    response = app.files().list(q=query,
-                                    spaces='drive',
-                                    fields='files(id, name, parents)').execute()
-
-    # Retrieving all files in the folder and sorting them by week number
-    files = response.get("files", [])
-    files_sorted = sorted(files, key=lambda i: i['name'], reverse=True)
-
-    # Looping through files searching for given name and week range
-    for file in files_sorted[0:int(weeks)]:
-        # Excluding template file from data
-        if file["name"] != "Presentie Lijst Template":
-            print(f"{file['name']}: {presentie(input_naam, file['id'])}")
-
-
-if __name__ == "__main__":
-    naam = input("Naam deelnemer: ")
-    weken = input("Aantal weken (max 10): ")
-    main(naam, weken)
