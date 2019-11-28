@@ -1,7 +1,15 @@
 from tkinter import *
+import os
+from datetime import datetime
+
+from fpdf import FPDF, HTMLMixin
 
 from presentie_app import presentie, client_auth
 from secret import folder_id
+
+
+class HTML2PDF(FPDF, HTMLMixin):
+    pass
 
 
 # Create window
@@ -26,6 +34,9 @@ def get_presentie_data(input_naam, weeks):
     files = response.get("files", [])
     files_sorted = sorted(files, key=lambda i: i['name'], reverse=True)
 
+    pdf = HTML2PDF()
+    HTML = "<h3>Aanwezigheid " + input_naam + "</h3><br><ul><br>{}<br></ul>"
+    li = ""
 
     data_list = list()
 
@@ -44,6 +55,10 @@ def get_presentie_data(input_naam, weeks):
                 }
             )
             print(f"{file['name']} succesvol opgehaald..")
+            li += f"<li>{file['name']}: {presentie_data[4]}% Aanwezig {presentie_data[3]}x geoorloofd afwezig | {presentie_data[2]}x ongeoorloofd afwezig</li>\n"
+    pdf.add_page()
+    pdf.write_html(HTML.format(li))
+    pdf.output(f'rapporten/{input_naam} {datetime.timestamp(datetime.now())}.pdf')        
     return data_list
 
 
@@ -65,7 +80,7 @@ deelnemer_entry.grid(row=0, column=1)
 
 # Week nummer
 week_text = StringVar()
-week_label = Label(app, text="Week nummer", font=('bold', 14), pady=10)
+week_label = Label(app, text="Aantal weken", font=('bold', 14), pady=10)
 week_label.grid(row=0, column=2, sticky=E)
 week_entry = Entry(app, textvariable=week_text)
 week_entry.grid(row=0, column=3)
