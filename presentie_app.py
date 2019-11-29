@@ -46,6 +46,7 @@ def get_data(spreadsheet_id):
     
     gsheet = app.spreadsheets().values().get(spreadsheetId=spreadsheet_id, 
                                              range="Lijst").execute()
+    print("Data sheet ingeladen...")
     # Setting header on row 3
     header = gsheet.get('values', [])[2]
     # Everything else is data
@@ -67,6 +68,7 @@ def get_data(spreadsheet_id):
             ds = pd.Series(data=column_data, name=col_name)
             all_data.append(ds)
         df = pd.concat(all_data, axis=1)
+        print("Data omgezet in dataframe...")
         return df
 
 
@@ -77,4 +79,5 @@ def presentie(naam, file_id):
                     "Afwezig", "Afgemeld", "% Aanwezig"]].itertuples():
         if row.Deelnemers == naam:
             return (row.Deelnemers, row.Aanwezig, row.Afwezig, row.Afgemeld, row._6)
+    print("Data doorsturen naar handlers...")
 

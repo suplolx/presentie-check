@@ -1,0 +1,11 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-image: url(../img/kr8tig-banner.png);
+    background-position: center center;
+    background-repeat: no-repeat;
+    /* background-attachment: fixed;
+    background-size:cover; */
+}

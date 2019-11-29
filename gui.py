@@ -2,14 +2,16 @@ from tkinter import *
 import os
 from datetime import datetime
 
-from fpdf import FPDF, HTMLMixin
+import jinja2
+import pdfkit
 
 from presentie_app import presentie, client_auth
 from secret import folder_id
 
 
-class HTML2PDF(FPDF, HTMLMixin):
-    pass
+templateloader = jinja2.FileSystemLoader(searchpath="./template")
+templateEnv = jinja2.Environment(loader=templateloader)
+TEMPLATE_FILE = "template.html"
 
 
 # Create window
@@ -34,10 +36,6 @@ def get_presentie_data(input_naam, weeks):
     files = response.get("files", [])
     files_sorted = sorted(files, key=lambda i: i['name'], reverse=True)
 
-    pdf = HTML2PDF()
-    HTML = "<h3>Aanwezigheid " + input_naam + "</h3><br><ul><br>{}<br></ul>"
-    li = ""
-
     data_list = list()
 
     # Looping through files searching for given name and week range
@@ -54,11 +52,13 @@ def get_presentie_data(input_naam, weeks):
                     "aanwezig_p": presentie_data[4]
                 }
             )
-            print(f"{file['name']} succesvol opgehaald..")
-            li += f"<li>{file['name']}: {presentie_data[4]}% Aanwezig {presentie_data[3]}x geoorloofd afwezig | {presentie_data[2]}x ongeoorloofd afwezig</li>\n"
-    pdf.add_page()
-    pdf.write_html(HTML.format(li))
-    pdf.output(f'rapporten/{input_naam} {datetime.timestamp(datetime.now())}.pdf')        
+            print(f"Data van {file['name']} verwerkt..")
+    template = templateEnv.get_template(TEMPLATE_FILE)
+    template_data = template.render(presentie=data_list, naam=input_naam, datum=datetime.now().strftime("%d-%m-%Y %H:%M:%S"))
+    html_file = open("test.html", 'w')
+    html_file.write(template_data)
+    html_file.close()
+    pdfkit.from_file("test.html", f"./rapporten/{input_naam} {data_list[-1]['week_nummer']} tm {data_list[0]['week_nummer']}.pdf")
     return data_list
 
 
